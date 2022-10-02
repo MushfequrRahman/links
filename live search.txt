@@ -1,0 +1,3 @@
+https://techarise.com/autocomplete-search-dynamic-data-using-codeigniter-bootstrap-typeahead/
+https://www.webslesson.info/2018/07/autocomplete-search-box-using-typeahead-in-codeigniter.html
+https://www.nicesnippets.com/blog/live-search-on-the-html-table-with-jquery-example

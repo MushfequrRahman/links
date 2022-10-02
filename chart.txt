@@ -1,0 +1,4 @@
+https://www.nicesnippets.com/blog/codeigniter-create-bar-chart-in-php-with-chart-js
+https://www.webslesson.info/2019/07/bar-or-column-chart-using-google-chart-in-codeigniter.html
+https://mfikri.com/en/blog/codeigniter-chart
+http://www.studyzone4u.com/post-details/how-to-show-data-values-on-top-of-each-bar-in-chartjs

@@ -1,0 +1,2 @@
+https://www.kodingmadesimple.com/2017/12/jquery-datatables-php-mysql-ajax.html
+https://makitweb.com/datatables-ajax-pagination-with-search-and-sort-in-codeigniter/

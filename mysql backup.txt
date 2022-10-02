@@ -1,0 +1,17 @@
+https://stackoverflow.com/questions/3031412/how-to-export-a-mysql-database-using-command-prompt
+
+https://stackoverflow.com/questions/36834203/automatic-mysql-backup-using-batch-file
+
+
+
+
+mysqldump -u root hr > d:/b/hr.sql
+
+
+
+D:\xampp\mysql\bin>mysqldump -u root hr > d:/b/hr.sql
+
+
+
+echo off 
+start "" "D:\xampp\mysql\bin\mysqldump.exe" --user root  hr --result-file="D:\b\hr.sql" --database hr

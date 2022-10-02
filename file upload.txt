@@ -1,0 +1,1 @@
+https://theonlytutorials.com/codeigniter-3-upload-file-and-insert-data-into-database/
