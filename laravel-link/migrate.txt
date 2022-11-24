@@ -1,0 +1,20 @@
+php artisan migrate	
+php artisan make:migration create_students_table --create=students
+
+
+মাইগ্রেশনটি rollback বা undo করা:
+
+কখনো আমরা আমাদের database এর আগের অবস্থানে যেতে হতে পারে , ধরুন আপনি একটা Migration run করার পর আপনার মনে হলোঃ আপনার যেকোনো একটি column নামের বানান ভুল হয়েছে বা আরও একটি ফিল্ড add করতে হবে তখন আবার নতুন মাইগ্রেশন না লিখে rollback আপনি rollback করতে পারেন, তারপর আপনি আপনার মাইগ্রেশনটাকে প্রয়োজন মতো লিখে আবার মাইগ্রেট কমান্ড রান করতে পারবেন। আর এর জন্য আপনাকে নিচের command টি রান করতে হবে :	
+php artisan migrate:rollback
+
+
+Migration ব্যবহার করে সব টেবিল গুলো মুছে ফেলা :
+
+Laravel Framework এ Migration ব্যবহার করে সব table মুছে ফেলতে চাইলে আপনি নিচের কমান্ডটি রান করাই করতে পারেন :
+php artisan migrate:reset
+
+একবারে সব টেবিল মুছে ফেলে নতুন করে তৈরি
+
+একবারে সব টেবিল মুছে ফেলে নতুন করে তৈরি করতে চাইলে আপনি নিচের কমান্ডটি রান করাই করতে পারেন :
+	
+php artisan migrate:refresh
