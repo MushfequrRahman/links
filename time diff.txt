@@ -1,0 +1,1 @@
+SELECT TIMEDIFF(STR_TO_DATE(ttime, '%h:%i %p'),STR_TO_DATE(ftime, '%h:%i %p')) as availTime from conveyance_create2 ;
