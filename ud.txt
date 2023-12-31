@@ -1,0 +1,2 @@
+https://www.webslesson.info/2018/09/update-multiple-rows-with-checkbox-in-php-using-ajax-jquery.html
+https://www.webslesson.info/2018/11/how-to-delete-multiple-records-using-checkbox-in-codeigniter.html

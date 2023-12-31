@@ -1,0 +1,2 @@
+https://www.allphptricks.com/check-file-size-extension-uploading-using-jquery/
+https://www.webcodeexpert.com/2016/01/jquery-to-validate-file-type-and-size.html

@@ -1,0 +1,2 @@
+https://stackoverflow.com/questions/58114582/check-all-inputs-in-form-with-a-given-class-are-not-empty
+https://www.sitepoint.com/community/t/validate-multiple-fields-that-have-same-name/5199

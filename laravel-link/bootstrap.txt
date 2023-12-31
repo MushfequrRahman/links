@@ -1,0 +1,2 @@
+https://www.itsolutionstuff.com/post/how-to-install-bootstrap-in-laravelexample.html
+https://stackoverflow.com/questions/67743576/laravel-8-is-not-loading-css-and-js-bootstrap

@@ -1,0 +1,1 @@
+https://stackoverflow.com/questions/51190811/google-line-chart-show-data-values-on-points-by-default
