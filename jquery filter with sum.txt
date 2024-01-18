@@ -1,0 +1,6 @@
+https://mottie.github.io/tablesorter/docs/example-widget-math.html
+https://www.jquerycards.com/ui/filter-sort/jquery-tablesorter-filter/
+https://www.cdnpkg.com/jquery.tablesorter
+https://www.cdnpkg.com/jquery.tablesorter/file/widget-filter.js/
+https://www.cdnpkg.com/jquery.tablesorter/file/widget-math.js/
+https://stackoverflow.com/questions/66706923/tablesorter-filter-and-sum-issue
