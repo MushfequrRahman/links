@@ -4,3 +4,4 @@ https://www.cdnpkg.com/jquery.tablesorter
 https://www.cdnpkg.com/jquery.tablesorter/file/widget-filter.js/
 https://www.cdnpkg.com/jquery.tablesorter/file/widget-math.js/
 https://stackoverflow.com/questions/66706923/tablesorter-filter-and-sum-issue
+https://mottie.github.io/tablesorter/docs/example-widget-filter-custom.html
