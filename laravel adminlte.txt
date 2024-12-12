@@ -1,0 +1,204 @@
+composer create-project laravel/laravel your-project-name
+cd your-project-name
+composer require jeroennoten/laravel-adminlte
+php artisan adminlte:install
+
+php artisan make:controller AuthController
+
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+
+class AuthController extends Controller
+{
+    // Show Registration Form
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
+    // Handle Registration
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Insert new user using Query Builder
+        DB::table('users')->insert([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->route('login')->with('success', 'Registration successful!');
+    }
+
+    // Show Login Form
+    public function showLogin()
+    {
+        return view('auth.login');
+    }
+
+    // Handle Login
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]);
+
+        // Use Query Builder to check credentials
+        $user = DB::table('users')->where('email', $request->email)->first();
+
+        if ($user && Hash::check($request->password, $user->password)) {
+            Auth::loginUsingId($user->id); // Log the user in
+            return redirect()->route('dashboard');
+        }
+
+        return back()->withErrors(['email' => 'Invalid credentials']);
+    }
+
+    // Handle Logout
+    public function logout()
+    {
+        Auth::logout();
+        return redirect()->route('login');
+    }
+}
+
+
+Now, define routes for the authentication pages in routes/web.php:
+
+
+use App\Http\Controllers\AuthController;
+
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Protected Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('adminlte::page', ['title' => 'Dashboard']);
+    })->name('dashboard');
+});
+
+
+Login View (login.blade.php)
+
+@extends('adminlte::auth.auth-page', ['auth_type' => 'login'])
+
+@section('auth_header', __('Sign in to start your session'))
+
+@section('auth_body')
+    <form action="{{ route('login') }}" method="POST">
+        @csrf
+        <div class="input-group mb-3">
+            <input type="email" name="email" class="form-control" placeholder="Email" value="{{ old('email') }}" required>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-envelope"></span>
+                </div>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input type="password" name="password" class="form-control" placeholder="Password" required>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8">
+                <div class="icheck-primary">
+                    <input type="checkbox" id="remember">
+                    <label for="remember"> Remember Me </label>
+                </div>
+            </div>
+            <div class="col-4">
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+            </div>
+        </div>
+    </form>
+@endsection
+
+@section('auth_footer')
+    <p class="mb-1">
+        <a href="#">I forgot my password</a>
+    </p>
+    <p class="mb-0">
+        <a href="{{ route('register') }}" class="text-center">Register a new membership</a>
+    </p>
+@endsection
+
+
+Register View (register.blade.php)
+
+@extends('adminlte::auth.auth-page', ['auth_type' => 'register'])
+
+@section('auth_header', __('Register a new membership'))
+
+@section('auth_body')
+    <form action="{{ route('register') }}" method="POST">
+        @csrf
+        <div class="input-group mb-3">
+            <input type="text" name="name" class="form-control" placeholder="Full name" value="{{ old('name') }}" required>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-user"></span>
+                </div>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input type="email" name="email" class="form-control" placeholder="Email" value="{{ old('email') }}" required>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-envelope"></span>
+                </div>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input type="password" name="password" class="form-control" placeholder="Password" required>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                </div>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input type="password" name="password_confirmation" class="form-control" placeholder="Retype password" required>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4 offset-8">
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </div>
+        </div>
+    </form>
+@endsection
+
+@section('auth_footer')
+    <p class="mb-0">
+        <a href="{{ route('login') }}" class="text-center">I already have a membership</a>
+    </p>
+@endsection
+
+
+php artisan migrate
+
+php artisan serve
+

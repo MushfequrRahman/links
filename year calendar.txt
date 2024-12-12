@@ -1,0 +1,97 @@
+https://stackoverflow.com/questions/13128701/how-display-only-years-in-input-bootstrap-datepicker
+
+
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Calendar extends CI_Controller {
+
+    public function index($year = 2024) {
+        $data['year'] = $year;
+        $data['calendarData'] = $this->generateYearCalendar($year);
+        
+        // Load the view and pass the data
+        $this->load->view('calendar_view', $data);
+    }
+
+    private function generateYearCalendar($year) {
+        $calendar = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+            $monthName = date("F", mktime(0, 0, 0, $month, 1, $year));
+
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $date = sprintf("%04d-%02d-%02d", $year, $month, $day);
+                $dayName = date("l", strtotime($date));
+
+                $calendar[] = [
+                    'date' => $date,
+                    'day' => $dayName,
+                    'month' => $monthName
+                ];
+            }
+        }
+
+        return $calendar;
+    }
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Year Calendar</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .calendar-table {
+            margin: 20px auto;
+            max-width: 80%;
+            border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .calendar-table th, .calendar-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .calendar-table th {
+            background-color: #4a90e2;
+            color: #fff;
+        }
+        .calendar-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .calendar-table tr:hover {
+            background-color: #e9f5ff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3 class="text-center">Year Calendar for <?php echo $year; ?></h3>
+    <table class="table calendar-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Month</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($calendarData as $entry): ?>
+                <tr>
+                    <td><?php echo $entry['date']; ?></td>
+                    <td><?php echo $entry['day']; ?></td>
+                    <td><?php echo $entry['month']; ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

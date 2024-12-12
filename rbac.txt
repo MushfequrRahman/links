@@ -1,0 +1,251 @@
+php artisan make:migration create_roles_table
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up()
+    {
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique(); // Role name (e.g., admin, editor)
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('roles');
+    }
+};
+
+1.2. Permissions Table
+
+php artisan make:migration create_permissions_table
+
+return new class extends Migration {
+    public function up()
+    {
+        Schema::create('permissions', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique(); // Permission name (e.g., create, edit)
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('permissions');
+    }
+};
+
+1.3. Role Permissions Table
+
+php artisan make:migration create_role_permissions_table
+
+return new class extends Migration {
+    public function up()
+    {
+        Schema::create('role_permissions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
+            $table->foreignId('permission_id')->constrained('permissions')->onDelete('cascade');
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('role_permissions');
+    }
+};
+
+1.4. User Roles Table
+php artisan make:migration create_user_roles_table
+
+return new class extends Migration {
+    public function up()
+    {
+        Schema::create('user_roles', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('user_roles');
+    }
+};
+
+Run Migrations
+
+php artisan migrate
+
+
+2. Create Role and Permission Controllers
+2.1. Role Controller
+
+php artisan make:controller RoleController
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class RoleController extends Controller
+{
+    public function index()
+    {
+        $roles = DB::table('roles')->get();
+        return view('roles.index', compact('roles'));
+    }
+
+    public function create()
+    {
+        return view('roles.create');
+    }
+
+    public function store(Request $request)
+    {
+        DB::table('roles')->insert([
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+        ]);
+
+        return redirect()->route('roles.index')->with('success', 'Role created successfully.');
+    }
+}
+
+2.2. Permission Controller
+
+Create a permission controller:
+
+php artisan make:controller PermissionController
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class PermissionController extends Controller
+{
+    public function index()
+    {
+        $permissions = DB::table('permissions')->get();
+        return view('permissions.index', compact('permissions'));
+    }
+
+    public function create()
+    {
+        return view('permissions.create');
+    }
+
+    public function store(Request $request)
+    {
+        DB::table('permissions')->insert([
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+        ]);
+
+        return redirect()->route('permissions.index')->with('success', 'Permission created successfully.');
+    }
+}
+
+2.3. Assign Roles and Permissions
+Assign Permissions to Roles:
+
+Add a method in RoleController:
+
+public function assignPermission(Request $request)
+{
+    DB::table('role_permissions')->insert([
+        'role_id' => $request->input('role_id'),
+        'permission_id' => $request->input('permission_id'),
+    ]);
+
+    return redirect()->back()->with('success', 'Permission assigned successfully.');
+}
+
+Assign Roles to Users:
+
+Add a method in RoleController:
+
+public function assignRoleToUser(Request $request)
+{
+    DB::table('user_roles')->insert([
+        'user_id' => $request->input('user_id'),
+        'role_id' => $request->input('role_id'),
+    ]);
+
+    return redirect()->back()->with('success', 'Role assigned to user successfully.');
+}
+
+3. Add Middleware for RBAC
+
+Create a middleware to restrict access based on roles:
+
+php artisan make:middleware RoleMiddleware
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Support\Facades\DB;
+
+class RoleMiddleware
+{
+    public function handle($request, Closure $next, $role)
+    {
+        $userId = auth()->id();
+
+        $hasRole = DB::table('user_roles')
+            ->join('roles', 'roles.id', '=', 'user_roles.role_id')
+            ->where('user_roles.user_id', $userId)
+            ->where('roles.name', $role)
+            ->exists();
+
+        if (!$hasRole) {
+            abort(403, 'Unauthorized.');
+        }
+
+        return $next($request);
+    }
+}
+
+4. Routes
+
+Define routes in routes/web.php:
+
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('roles', RoleController::class);
+    Route::resource('permissions', PermissionController::class);
+
+    Route::post('/roles/assign-permission', [RoleController::class, 'assignPermission'])->name('roles.assignPermission');
+    Route::post('/users/assign-role', [RoleController::class, 'assignRoleToUser'])->name('users.assignRole');
+});
+
+5. Views
+Role Creation Form (resources/views/roles/create.blade.php):
+
+<form action="{{ route('roles.store') }}" method="POST">
+    @csrf
+    <label for="name">Role Name:</label>
+    <input type="text" name="name" id="name" required>
+
+    <label for="description">Description:</label>
+    <textarea name="description" id="description"></textarea>
+
+    <button type="submit">Create Role</button>
+</form>
+
+
+
+https://chatgpt.com/c/675926f3-cf64-8008-9030-b2249711041b
