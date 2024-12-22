@@ -1,0 +1,155 @@
+composer create-project --prefer-dist laravel/laravel project-name
+
+composer require livewire/livewire
+
+php artisan make:livewire hello-world
+
+এটি দুটি ফাইল তৈরি করবে:
+
+    app/Http/Livewire/HelloWorld.php (Livewire কম্পোনেন্ট ক্লাস)
+    resources/views/livewire/hello-world.blade.php (Blade টেমপ্লেট)
+
+1.3 Livewire কম্পোনেন্ট কোড:
+
+HelloWorld.php ফাইলের কোড:
+
+namespace App\Http\Livewire;
+
+use Livewire\Component;
+
+class HelloWorld extends Component
+{
+    public $message = "Hello, World!";  // ডিফল্ট মেসেজ
+
+    public function render()
+    {
+        return view('livewire.hello-world');  // Blade টেমপ্লেট রেন্ডার করা
+    }
+}
+
+hello-world.blade.php ফাইলের কোড:
+
+<div>
+    <h1>{{ $message }}</h1>
+    <button wire:click="changeMessage">Change Message</button>
+</div>
+
+1.4 Livewire মেথড:
+
+Livewire কম্পোনেন্টে একটি মেথড যোগ করুন যা মেসেজ পরিবর্তন করবে।
+
+HelloWorld.php ফাইলের কোড:
+
+public function changeMessage()
+{
+    $this->message = "Hello from Livewire!";  // মেসেজ পরিবর্তন
+}
+
+ Vue.js ইনস্টল করুন:
+
+npm install vue@latest
+
+2.2 Vue কম্পোনেন্ট তৈরি করুন:
+
+resources/js/components/HelloWorld.vue ফাইল তৈরি করুন:
+
+<template>
+  <div>
+    <h1>{{ message }}</h1>
+    <button @click="changeMessage">Change Message</button>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      message: 'Hello from Vue.js!'
+    }
+  },
+  methods: {
+    changeMessage() {
+      this.message = 'Hello from Vue.js after button click!';
+    }
+  }
+}
+</script>
+
+এখানে Vue.js কম্পোনেন্টে একটি message প্রপার্টি এবং একটি button আছে। যখন বাটনে ক্লিক করা হবে, message আপডেট হবে।
+
+2.3 Vue কম্পোনেন্ট ইনিশিয়ালাইজ করুন:
+
+Laravel এর resources/js/app.js ফাইলের মধ্যে Vue.js সেটআপ করুন:
+
+import { createApp } from 'vue';
+import HelloWorld from './components/HelloWorld.vue';
+
+const app = createApp({});
+app.component('hello-world', HelloWorld);
+app.mount('#app');
+
+এটি Vue.js কম্পোনেন্টটি ইনিশিয়ালাইজ করে, এবং #app আইডির ভিতরে কম্পোনেন্টটি রেন্ডার করবে।
+
+2.4 Vue.js কম্পোনেন্ট রেন্ডার করুন:
+
+এখন Blade ফাইলে Vue কম্পোনেন্ট ব্যবহার করা হবে। উদাহরণস্বরূপ, resources/views/welcome.blade.php ফাইলে Vue কম্পোনেন্টটি রেন্ডার করুন:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World</title>
+    @vite('resources/js/app.js') <!-- Vite Script -->
+    @livewireStyles
+</head>
+<body>
+    <!-- Livewire কম্পোনেন্ট -->
+    @livewire('hello-world-livewire')
+
+    <!-- Vue.js কম্পোনেন্ট -->
+    <div id="vue-app">
+        <hello-world></hello-world>
+    </div>
+
+    @livewireScripts
+</body>
+</html>
+
+
+এখানে #app এলিমেন্টের ভিতরে Vue.js কম্পোনেন্ট রেন্ডার হবে।
+3. Livewire এবং Vue.js একসাথে ব্যবহার করা
+
+এখন আপনি Livewire এবং Vue.js একসাথে ব্যবহার করতে পারেন।
+
+    Livewire কম্পোনেন্টটি ব্যবহার করার জন্য, Blade টেমপ্লেটের ভিতরে Livewire কম্পোনেন্টটি রেন্ডার করুন:
+
+@livewire('hello-world')
+
+Vue.js কম্পোনেন্টটি রেন্ডার করতে, Blade ফাইলে Vue কম্পোনেন্টের নাম ব্যবহার করুন:
+
+<hello-world></hello-world>
+
+
+npm install @vitejs/plugin-vue
+
+
+২. vite.config.js কনফিগারেশন আপডেট করা
+
+এখন vite.config.js ফাইলে এই নতুন প্লাগইনটি যুক্ত করুন:
+
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+import vue from '@vitejs/plugin-vue'; // Vue.js প্লাগইন
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: ['resources/css/app.css', 'resources/js/app.js'],
+            refresh: true,
+        }),
+        vue(), // Vue.js প্লাগইন যোগ করা
+    ],
+});
+
+
