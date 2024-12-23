@@ -152,4 +152,128 @@ export default defineConfig({
     ],
 });
 
+ধাপ ১: AdminLTE ডাউনলোড করুন
+
+ধাপ ২: Laravel প্রজেক্টে CSS এবং JS ফাইল কপি করুন
+Step 1: Public ডিরেক্টরিতে ফাইল কপি করুন
+
+    ডাউনলোড করা AdminLTE এর dist ফোল্ডার থেকে নিচের ফাইলগুলো public/adminlte ফোল্ডারে কপি করুন:
+        dist/css (CSS ফাইলগুলো)
+        dist/js (JS ফাইলগুলো)
+        plugins (প্লাগইনগুলো)
+
+Step 2: Laravel Vite এর মাধ্যমে অ্যাসেট লোড করুন (ঐচ্ছিক)
+
+আপনার অ্যাসেট ম্যানেজমেন্ট Vite ব্যবহার করলে resources/css এবং resources/js ফোল্ডারে AdminLTE ফাইলগুলো কপি করুন।
+
+ধাপ ৩: Blade লেআউট তৈরি করুন
+Step 1: Layout Blade ফাইল তৈরি করুন
+
+resources/views/layouts/app.blade.php ফাইল তৈরি করুন:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'AdminLTE Dashboard')</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
+        <!-- Navbar -->
+        @include('layouts.partials.navbar')
+
+        <!-- Sidebar -->
+        @include('layouts.partials.sidebar')
+
+        <!-- Content -->
+        <div class="content-wrapper">
+            @yield('content')
+        </div>
+
+        <!-- Footer -->
+        @include('layouts.partials.footer')
+    </div>
+
+    <!-- JS -->
+    <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
+</body>
+</html>
+
+
+Step 2: Partial ফাইল তৈরি করুন
+
+    Navbar (resources/views/layouts/partials/navbar.blade.php):
+
+<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+    </ul>
+</nav>
+
+Sidebar (resources/views/layouts/partials/sidebar.blade.php):
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="/" class="brand-link">
+        <span class="brand-text font-weight-light">AdminLTE</span>
+    </a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>
+
+Footer (resources/views/layouts/partials/footer.blade.php):
+
+<footer class="main-footer">
+    <div class="float-right d-none d-sm-inline">
+        Anything you want
+    </div>
+    <strong>Copyright &copy; 2024 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+</footer>
+
+ধাপ ৪: কন্টেন্ট পেজ তৈরি করুন
+
+একটি পেজ তৈরি করুন এবং এটি লেআউট ব্যবহার করে এক্সটেন্ড করুন। উদাহরণ:
+
+resources/views/dashboard.blade.php:
+
+@extends('layouts.app')
+
+@section('title', 'Dashboard')
+
+@section('content')
+    <div class="container-fluid">
+        <h1>Welcome to AdminLTE Dashboard</h1>
+    </div>
+@endsection
+
+
+ধাপ ৫: Route সেট করুন
+
+routes/web.php ফাইলে একটি Route যোগ করুন:
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+});
+
+
 
