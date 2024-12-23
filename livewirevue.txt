@@ -81,12 +81,24 @@ export default {
 
 Laravel এর resources/js/app.js ফাইলের মধ্যে Vue.js সেটআপ করুন:
 
+import './bootstrap';
 import { createApp } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import VueHelloWorld from './components/VueHelloWorld.vue';
+import Test from './components/Test.vue';
 
-const app = createApp({});
-app.component('hello-world', HelloWorld);
+// const app = createApp({});
+// app.component('vue-hello-world', VueHelloWorld);
+//app.component('test', Test);
+
+const app = createApp(VueHelloWorld);
+const app1 = createApp(Test);
+
+
+
 app.mount('#app');
+app1.mount('#app1');
+
+
 
 এটি Vue.js কম্পোনেন্টটি ইনিশিয়ালাইজ করে, এবং #app আইডির ভিতরে কম্পোনেন্টটি রেন্ডার করবে।
 
