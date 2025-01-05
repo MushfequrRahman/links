@@ -55,25 +55,27 @@ resources/js/components/HelloWorld.vue ফাইল তৈরি করুন:
 
 <template>
   <div>
-    <h1>{{ message }}</h1>
-    <button @click="changeMessage">Change Message</button>
+      <h1>{{ message }}</h1>
+      <button @click="changeMessage">Change Message</button>
   </div>
 </template>
 
 <script>
 export default {
+  name: 'VueHelloWorld',
   data() {
-    return {
-      message: 'Hello from Vue.js!'
-    }
+      return {
+          message: 'Hello from Vue.js!'
+      };
   },
   methods: {
-    changeMessage() {
-      this.message = 'Hello from Vue.js after button click!';
-    }
+      changeMessage() {
+          this.message = 'Hello from Vue.js after button click!';
+      }
   }
-}
+};
 </script>
+
 
 এখানে Vue.js কম্পোনেন্টে একটি message প্রপার্টি এবং একটি button আছে। যখন বাটনে ক্লিক করা হবে, message আপডেট হবে।
 
@@ -97,6 +99,47 @@ const app1 = createApp(Test);
 
 app.mount('#app');
 app1.mount('#app1');
+
+///////////
+
+
+import './bootstrap';
+import { createApp } from 'vue';
+import VueHelloWorld from './components/VueHelloWorld.vue';
+import Test from './components/Test.vue';
+
+// একটি Vue অ্যাপ তৈরি
+const app = createApp({});
+
+// কম্পোনেন্ট নিবন্ধন
+app.component('vue-hello-world', VueHelloWorld);
+app.component('test', Test);
+
+// একক মাউন্ট পয়েন্টে মাউন্ট
+app.mount('#app');
+
+
+vite.config.js
+
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import laravel from 'laravel-vite-plugin';
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: ['resources/css/app.css', 'resources/js/app.js'],
+            refresh: true,
+        }),
+        vue(),
+    ],
+    resolve: {
+        alias: {
+            vue: 'vue/dist/vue.esm-bundler.js', // Add this line
+        },
+    },
+});
+
 
 
 
