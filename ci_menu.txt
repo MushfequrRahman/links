@@ -1,0 +1,315 @@
+ঠিক আছে ✅ এখন আমি পুরোটা একেবারে শুরু থেকে সাজিয়ে লিখছি — যাতে আপনার CodeIgniter 3 + AdminLTE 2 প্রজেক্টে থাকবে:
+
+1. **Database Table structure**
+2. **Models**
+3. **Permission hook (route protect)**
+4. **Dynamic Sidebar (AdminLTE 2)**
+5. **Breadcrumbs helper**
+6. **Drag & Drop UI (modules.order update)**
+
+---
+
+# 1. Database Tables
+
+### `modules`
+
+```sql
+CREATE TABLE `modules` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,        -- Module/Menu name
+  `route` VARCHAR(150) NOT NULL,       -- Controller/Method (e.g. users/index)
+  `icon` VARCHAR(50) DEFAULT NULL,     -- FontAwesome class (fa fa-user)
+  `slug` VARCHAR(100) NOT NULL,        -- unique identifier
+  `type` ENUM('module','submodule') DEFAULT 'module',
+  `parent_id` INT DEFAULT NULL,
+  `order` INT DEFAULT 0,
+  `show_in_sidebar` TINYINT(1) DEFAULT 1
+);
+```
+
+### `user_module_permissions`
+
+```sql
+CREATE TABLE `user_module_permissions` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `module_id` INT NOT NULL,
+  FOREIGN KEY (`module_id`) REFERENCES `modules`(`id`) ON DELETE CASCADE
+);
+```
+
+---
+
+# 2. Model
+
+**`application/models/Module_model.php`**
+
+```php
+<?php
+class Module_model extends CI_Model {
+
+    // সব modules আনবে order অনুযায়ী
+    public function get_all_modules() {
+        $this->db->order_by('order', 'ASC');
+        return $this->db->get('modules')->result_array();
+    }
+
+    // user এর modules আনবে
+    public function get_user_modules($user_id) {
+        $this->db->select('m.*');
+        $this->db->from('modules m');
+        $this->db->join('user_module_permissions ump', 'm.id = ump.module_id');
+        $this->db->where('ump.user_id', $user_id);
+        $this->db->where('m.show_in_sidebar', 1);
+        $this->db->order_by('m.parent_id ASC, m.order ASC');
+        return $this->db->get()->result_array();
+    }
+
+    // user permission check
+    public function has_permission($user_id, $route) {
+        $this->db->select('m.id');
+        $this->db->from('modules m');
+        $this->db->join('user_module_permissions ump', 'm.id = ump.module_id');
+        $this->db->where('ump.user_id', $user_id);
+        $this->db->where('m.route', $route);
+        return $this->db->get()->num_rows() > 0;
+    }
+}
+```
+
+---
+
+# 3. Hook (Permission Middleware)
+
+**`application/hooks/Permission_hook.php`**
+
+```php
+<?php
+class Permission_hook {
+    private $CI;
+
+    public function __construct() {
+        $this->CI =& get_instance();
+    }
+
+    public function check_permission() {
+        $user_id = $this->CI->session->userdata('user_id');
+        $route   = $this->CI->router->class . '/' . $this->CI->router->method;
+
+        if (!$user_id) {
+            redirect('auth/login');
+        }
+
+        $this->CI->load->model('Module_model');
+        if (!$this->CI->Module_model->has_permission($user_id, $route)) {
+            show_error('Access Denied! You don’t have permission to access this page.', 403);
+        }
+    }
+}
+```
+
+**`application/config/hooks.php`**
+
+```php
+$hook['post_controller_constructor'][] = array(
+    'class'    => 'Permission_hook',
+    'function' => 'check_permission',
+    'filename' => 'Permission_hook.php',
+    'filepath' => 'hooks'
+);
+```
+
+---
+
+# 4. Sidebar View
+
+**`application/views/layout/sidebar.php`**
+
+```php
+<?php
+$this->load->model('Module_model');
+$user_id = $this->session->userdata('user_id');
+$modules = $this->Module_model->get_user_modules($user_id);
+
+$menu_tree = [];
+foreach ($modules as $m) {
+    if ($m['parent_id'] == null) {
+        $menu_tree[$m['id']] = $m;
+        $menu_tree[$m['id']]['children'] = [];
+    }
+}
+foreach ($modules as $m) {
+    if ($m['parent_id'] != null && isset($menu_tree[$m['parent_id']])) {
+        $menu_tree[$m['parent_id']]['children'][] = $m;
+    }
+}
+?>
+
+<ul class="sidebar-menu" data-widget="tree">
+    <?php foreach ($menu_tree as $menu): ?>
+        <?php if (empty($menu['children'])): ?>
+            <li>
+                <a href="<?= site_url($menu['route']); ?>">
+                    <i class="<?= $menu['icon']; ?>"></i> <span><?= $menu['name']; ?></span>
+                </a>
+            </li>
+        <?php else: ?>
+            <li class="treeview">
+                <a href="#">
+                    <i class="<?= $menu['icon']; ?>"></i> <span><?= $menu['name']; ?></span>
+                    <i class="fa fa-angle-left pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+                    <?php foreach ($menu['children'] as $child): ?>
+                        <li><a href="<?= site_url($child['route']); ?>"><i class="<?= $child['icon']; ?>"></i> <?= $child['name']; ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </li>
+        <?php endif; ?>
+    <?php endforeach; ?>
+</ul>
+```
+
+---
+
+# 5. Breadcrumb Helper
+
+**`application/helpers/breadcrumb_helper.php`**
+
+```php
+<?php
+function generate_breadcrumb($route) {
+    $CI =& get_instance();
+    $CI->db->where('route', $route);
+    $module = $CI->db->get('modules')->row_array();
+
+    $breadcrumb = '<ol class="breadcrumb">';
+    $breadcrumb .= '<li><a href="'.site_url('dashboard').'"><i class="fa fa-dashboard"></i> Home</a></li>';
+
+    if ($module) {
+        if ($module['parent_id']) {
+            $parent = $CI->db->get_where('modules', ['id' => $module['parent_id']])->row_array();
+            if ($parent) {
+                $breadcrumb .= '<li><a href="'.site_url($parent['route']).'">'.$parent['name'].'</a></li>';
+            }
+        }
+        $breadcrumb .= '<li class="active">'.$module['name'].'</li>';
+    }
+
+    $breadcrumb .= '</ol>';
+    return $breadcrumb;
+}
+```
+
+**View ব্যবহার**:
+
+```php
+<?= generate_breadcrumb($this->router->class . '/' . $this->router->method); ?>
+```
+
+---
+
+# 6. Drag & Drop Reorder UI
+
+**Controller: `application/controllers/Modules.php`**
+
+```php
+<?php
+class Modules extends CI_Controller {
+    public function __construct() {
+        parent::__construct();
+        $this->load->model('Module_model');
+    }
+
+    public function reorder() {
+        $data['modules'] = $this->Module_model->get_all_modules();
+        $this->load->view('modules/reorder', $data);
+    }
+
+    public function update_order() {
+        $orders = $this->input->post('order');
+        if ($orders) {
+            foreach ($orders as $position => $id) {
+                $this->db->where('id', $id)->update('modules', ['order' => $position + 1]);
+            }
+            echo json_encode(['status' => 'success']);
+        } else {
+            echo json_encode(['status' => 'error']);
+        }
+    }
+}
+```
+
+**View: `application/views/modules/reorder.php`**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reorder Modules</title>
+    <link rel="stylesheet" href="<?= base_url('assets/adminlte/bootstrap/css/bootstrap.min.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/adminlte/dist/css/AdminLTE.min.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/adminlte/dist/css/skins/_all-skins.min.css'); ?>">
+    <script src="<?= base_url('assets/adminlte/plugins/jQuery/jquery-2.2.3.min.js'); ?>"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <style>
+        #sortable { list-style-type: none; margin: 0; padding: 0; width: 400px; }
+        #sortable li {
+            margin: 5px 0; padding: 10px;
+            background: #f4f4f4; border: 1px solid #ddd;
+            cursor: move; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<section class="content">
+    <h3>Drag & Drop Modules to Reorder</h3>
+    <ul id="sortable">
+        <?php foreach ($modules as $m): ?>
+            <li class="ui-state-default" data-id="<?= $m['id']; ?>">
+                <i class="<?= $m['icon']; ?>"></i> <?= $m['name']; ?> 
+                <small class="text-muted">(<?= $m['route']; ?>)</small>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+    <button id="saveOrder" class="btn btn-primary">Save Order</button>
+</section>
+
+<script>
+$(function() {
+    $("#sortable").sortable();
+    $("#sortable").disableSelection();
+
+    $("#saveOrder").click(function() {
+        var order = [];
+        $("#sortable li").each(function() {
+            order.push($(this).data("id"));
+        });
+
+        $.post("<?= site_url('modules/update_order'); ?>", {order: order}, function(res) {
+            if (res.status === "success") {
+                alert("Order updated successfully!");
+                location.reload();
+            } else {
+                alert("Error updating order");
+            }
+        }, 'json');
+    });
+});
+</script>
+</body>
+</html>
+```
+
+---
+
+✅ এখন আপনার সিস্টেমে হবে:
+
+* Dynamic Sidebar (user permission অনুযায়ী)
+* Breadcrumbs (module/submodule অনুযায়ী)
+* Permission Hook (URL copy-paste থেকেও secure)
+* Drag & Drop module ordering (sidebar order update হবে DB থেকে)
+
+---
+
+আপনি কি চান আমি এখন একটা **sample seed data insert SQL** লিখে দেই যাতে আপনি টেস্ট করতে পারেন (Dashboard, Users, Add User etc.)?

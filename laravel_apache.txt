@@ -1,0 +1,25 @@
+https://chatgpt.com/c/68d258ef-7b18-8332-b7e4-c939eb5ea9f9
+
+
+C:\xampp\apache\conf\extra\httpd-vhosts.conf
+
+<VirtualHost *:80>
+    ServerAdmin admin@localhost
+    DocumentRoot "D:/xampp-8.2.12/htdocs/machine_inventory_laravel/public"
+    ServerName machine_inventory_laravel
+    <Directory "D:/xampp-8.2.12/htdocs/machine_inventory_laravel/public">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    ErrorLog "logs/machine_inventory_laravel-error.log"
+    CustomLog "logs/machine_inventory_laravel-access.log" combined
+</VirtualHost>
+
+
+C:\Windows\System32\drivers\etc\hosts
+
+
+127.0.0.1 machine_inventory_laravel
+
+APP_URL=http://machine_inventory_laravel
